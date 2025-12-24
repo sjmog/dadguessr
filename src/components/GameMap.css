@@ -114,9 +114,9 @@
   background: var(--christmas-gold) !important;
 }
 
-/* Animated guess lines - dashed with fade-in */
+/* Animated guess lines - fade-in animation */
+/* Note: dashArray is set via Leaflet pathOptions for consistency */
 .guess-line {
-  stroke-dasharray: 12, 8;
   animation: line-appear 0.6s ease-out forwards;
   opacity: 0;
 }
@@ -131,14 +131,11 @@
 @keyframes line-appear {
   0% {
     opacity: 0;
-    stroke-width: 1;
   }
   50% {
     opacity: 0.9;
-    stroke-width: 4;
   }
   100% {
     opacity: 0.85;
-    stroke-width: 3;
   }
 }

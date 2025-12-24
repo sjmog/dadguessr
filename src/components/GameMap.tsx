@@ -244,6 +244,7 @@ export function GameMap({
                   pathOptions={{
                     color: player.color,
                     weight: 3,
+                    dashArray: '12, 8',
                     className: `guess-line guess-line-${index}`,
                   }}
                 />
