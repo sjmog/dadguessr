@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Location } from '../types';
 import './PostcardModal.css';
 
@@ -9,24 +10,26 @@ interface PostcardModalProps {
 }
 
 export function PostcardModal({ location, roundNumber, totalRounds, onDismiss }: PostcardModalProps) {
-  // Use a placeholder image for now - we'll add real images later
   const imageUrl = `/images/${location.image}`;
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   return (
     <div className="postcard-overlay" onClick={onDismiss}>
       <div className="postcard" onClick={(e) => e.stopPropagation()}>
         <div className="postcard-image-frame">
-          <div 
-            className="postcard-image"
-            style={{ 
-              backgroundImage: `url(${imageUrl})`,
-              backgroundColor: '#ddd'
-            }}
-          >
-            <div className="postcard-placeholder">
-              <span className="placeholder-icon">🎉</span>
-              <span className="placeholder-text">Dad is somewhere...</span>
-            </div>
+          <div className="postcard-image-container">
+            {!imageLoaded && (
+              <div className="postcard-loading">
+                <span className="loading-globe">🌍</span>
+              </div>
+            )}
+            <img 
+              key={imageUrl}
+              src={imageUrl}
+              alt="Where is Dad?"
+              className={`postcard-image ${imageLoaded ? 'loaded' : ''}`}
+              onLoad={() => setImageLoaded(true)}
+            />
           </div>
         </div>
         
@@ -53,4 +56,3 @@ export function PostcardModal({ location, roundNumber, totalRounds, onDismiss }:
     </div>
   );
 }
-
