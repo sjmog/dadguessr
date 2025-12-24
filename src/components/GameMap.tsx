@@ -73,12 +73,12 @@ function MapBoundsFitter({
   isRevealing, 
   guessPositions, 
   actualPosition,
-  onAnimationComplete,
+  onShowLines,
 }: { 
   isRevealing: boolean; 
   guessPositions: [number, number][]; 
   actualPosition?: [number, number];
-  onAnimationComplete?: () => void;
+  onShowLines?: () => void;
 }) {
   const map = useMap();
   
@@ -93,9 +93,9 @@ function MapBoundsFitter({
       // Create bounds from all points
       const bounds = L.latLngBounds(allPoints.map(([lat, lon]) => [lat, lon]));
       
-      // Small delay to let reveal animation start, then smoothly fit bounds
-      // Extra bottom padding for the score chips bar
-      const startTimer = setTimeout(() => {
+      // Start fitBounds and show lines at the same time
+      // Lines will fade in while map is panning/zooming
+      const timer = setTimeout(() => {
         map.fitBounds(bounds, {
           paddingTopLeft: [50, 100],
           paddingBottomRight: [50, 200],
@@ -103,19 +103,12 @@ function MapBoundsFitter({
           animate: true,
           duration: 1.5,
         });
+        onShowLines?.();
       }, 300);
       
-      // Call onAnimationComplete shortly after animation starts settling
-      const completeTimer = setTimeout(() => {
-        onAnimationComplete?.();
-      }, 1200); // Show lines while map is still settling
-      
-      return () => {
-        clearTimeout(startTimer);
-        clearTimeout(completeTimer);
-      };
+      return () => clearTimeout(timer);
     }
-  }, [isRevealing, guessPositions, actualPosition, map, onAnimationComplete]);
+  }, [isRevealing, guessPositions, actualPosition, map, onShowLines]);
   
   return null;
 }
@@ -208,7 +201,7 @@ export function GameMap({
           isRevealing={isRevealing} 
           guessPositions={guessPositions}
           actualPosition={actualPosition}
-          onAnimationComplete={() => setShowLines(true)}
+          onShowLines={() => setShowLines(true)}
         />
 
         {/* Render all player guesses */}
