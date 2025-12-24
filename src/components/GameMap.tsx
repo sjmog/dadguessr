@@ -247,6 +247,8 @@ export function GameMap({
               const player = players.find((p) => p.id === guess.playerId);
               if (!player) return null;
               
+              // Keep pathOptions stable to prevent element recreation
+              // Opacity is controlled purely via CSS class for smooth transitions
               return (
                 <Polyline
                   key={`line-${player.id}`}
@@ -258,7 +260,6 @@ export function GameMap({
                     color: player.color,
                     weight: 3,
                     dashArray: '12, 8',
-                    opacity: linesVisible ? 0.85 : 0,
                     className: `guess-line guess-line-${index}${linesVisible ? ' visible' : ''}`,
                   }}
                 />

@@ -114,10 +114,17 @@
   background: var(--christmas-gold) !important;
 }
 
-/* Animated guess lines - transition-based fade-in */
-/* Note: dashArray and opacity are set via Leaflet pathOptions for consistency */
+/* Animated guess lines - CSS-controlled opacity for smooth transitions */
+/* Opacity controlled via class, not Leaflet pathOptions, to prevent element recreation */
 .guess-line {
+  opacity: 0;
+  stroke-opacity: 0;
   transition: opacity 0.5s ease-out, stroke-opacity 0.5s ease-out;
+}
+
+.guess-line.visible {
+  opacity: 0.85;
+  stroke-opacity: 0.85;
 }
 
 /* Staggered delays for each line */
