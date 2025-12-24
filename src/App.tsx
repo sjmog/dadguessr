@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useGameState } from './hooks/useGameState';
+import { TitleScreen } from './components/TitleScreen';
+import { PlayerSetup } from './components/PlayerSetup';
+import { GameRound } from './components/GameRound';
+import { FinalLeaderboard } from './components/FinalLeaderboard';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { state, actions } = useGameState();
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  // Route to the appropriate screen based on game phase
+  switch (state.phase) {
+    case 'title':
+      return <TitleScreen onStart={(count) => actions.startSetup(count)} />;
+
+    case 'setup':
+      return (
+        <PlayerSetup
+          players={state.players}
+          onSetPlayerInfo={actions.setPlayerInfo}
+          onBeginJourney={actions.beginJourney}
+          onBack={actions.goToTitle}
+        />
+      );
+
+    case 'playing':
+    case 'reveal':
+      return (
+        <GameRound
+          state={state}
+          onPlacePin={actions.placePin}
+          onLockGuess={actions.lockGuess}
+          onStartReveal={actions.startReveal}
+          onNextRound={actions.nextRound}
+        />
+      );
+
+    case 'final':
+      return (
+        <FinalLeaderboard
+          players={state.players}
+          onPlayAgain={actions.playAgain}
+        />
+      );
+
+    default:
+      return <TitleScreen onStart={() => actions.startSetup(2)} />;
+  }
 }
 
-export default App
+export default App;
