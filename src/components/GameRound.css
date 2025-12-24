@@ -1,0 +1,230 @@
+.game-round {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--midnight-blue);
+}
+
+/* Header */
+.round-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+  position: relative;
+  z-index: 100;
+}
+
+.round-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.round-number {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--christmas-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.location-hint {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--snow-white);
+  opacity: 0.8;
+}
+
+.turn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255,255,255,0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 30px;
+  backdrop-filter: blur(5px);
+}
+
+.turn-avatar {
+  font-size: 1.5rem;
+}
+
+.turn-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.scoreboard-toggle,
+.view-postcard-btn {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(5px);
+}
+
+.scoreboard-toggle:hover,
+.view-postcard-btn:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* Map area */
+.map-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Lock in button */
+.lock-in-container {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+}
+
+.lock-in-button {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  padding: 1rem 2.5rem;
+  background: var(--christmas-green);
+  color: white;
+  border: 4px solid white;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  transition: all 0.2s;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 0 rgba(22, 91, 51, 0.4); }
+  50% { box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 10px rgba(22, 91, 51, 0); }
+}
+
+.lock-in-button:hover {
+  transform: scale(1.05);
+  background: #1a7a42;
+}
+
+/* Reveal panel */
+.reveal-panel {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--warm-cream);
+  border-radius: 15px;
+  padding: 1.5rem;
+  width: 320px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  z-index: 500;
+  animation: slide-in 0.4s ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.reveal-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--christmas-red);
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.reveal-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.reveal-score-row {
+  display: grid;
+  grid-template-columns: 30px 30px 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  animation: pop-in 0.3s ease-out backwards;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.reveal-rank {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--christmas-gold);
+}
+
+.reveal-avatar {
+  font-size: 1.2rem;
+}
+
+.reveal-name {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.reveal-distance {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.reveal-points {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.next-round-button {
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  padding: 0.8rem;
+  background: var(--christmas-green);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.next-round-button:hover {
+  background: #1a7a42;
+  transform: translateY(-2px);
+}
+
