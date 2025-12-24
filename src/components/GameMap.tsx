@@ -64,6 +64,46 @@ function MapResetter({ shouldReset }: { shouldReset: boolean }) {
   return null;
 }
 
+// Component to fit map bounds to all points during reveal
+function MapBoundsFitter({ 
+  isRevealing, 
+  guessPositions, 
+  actualPosition 
+}: { 
+  isRevealing: boolean; 
+  guessPositions: [number, number][]; 
+  actualPosition?: [number, number];
+}) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (isRevealing && guessPositions.length > 0) {
+      // Collect all points to fit in bounds
+      const allPoints: [number, number][] = [...guessPositions];
+      if (actualPosition) {
+        allPoints.push(actualPosition);
+      }
+      
+      // Create bounds from all points
+      const bounds = L.latLngBounds(allPoints.map(([lat, lon]) => [lat, lon]));
+      
+      // Small delay to let reveal animation start, then smoothly fit bounds
+      const timer = setTimeout(() => {
+        map.fitBounds(bounds, {
+          padding: [80, 80],
+          maxZoom: 8,
+          animate: true,
+          duration: 1.5,
+        });
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isRevealing, guessPositions, actualPosition, map]);
+  
+  return null;
+}
+
 export function GameMap({
   players,
   roundGuesses,
@@ -72,6 +112,12 @@ export function GameMap({
   actualLocation,
   onPlacePin,
 }: GameMapProps) {
+  // Prepare positions for bounds fitting
+  const guessPositions: [number, number][] = roundGuesses.map(g => [g.lat, g.lon]);
+  const actualPosition: [number, number] | undefined = actualLocation 
+    ? [actualLocation.lat, actualLocation.lon] 
+    : undefined;
+
   return (
     <div className="game-map-container">
       <MapContainer
@@ -87,6 +133,11 @@ export function GameMap({
         
         <MapClickHandler onPlacePin={onPlacePin} disabled={isRevealing} />
         <MapResetter shouldReset={!isRevealing && roundGuesses.length === 0} />
+        <MapBoundsFitter 
+          isRevealing={isRevealing} 
+          guessPositions={guessPositions}
+          actualPosition={actualPosition}
+        />
 
         {/* Render all player guesses */}
         {roundGuesses.map((guess) => {
