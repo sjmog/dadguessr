@@ -48,11 +48,28 @@
   50% { transform: rotate(-45deg) scale(1.1); }
 }
 
+/* Highlighted state for hover interaction */
+.marker-pin.highlighted {
+  transform: translateY(-6px);
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.marker-pin.highlighted::before {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 0 0 3px rgba(255,255,255,0.8);
+}
+
+.marker-pin.highlighted .marker-avatar {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
 .marker-avatar {
   position: relative;
   z-index: 1;
   font-size: 1.5rem;
   margin-top: 6px;
+  transition: transform 0.2s ease;
 }
 
 /* Actual location marker */
@@ -97,3 +114,31 @@
   background: var(--christmas-gold) !important;
 }
 
+/* Animated guess lines - dashed with fade-in */
+.guess-line {
+  stroke-dasharray: 12, 8;
+  animation: line-appear 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.guess-line-0 { animation-delay: 0s; }
+.guess-line-1 { animation-delay: 0.08s; }
+.guess-line-2 { animation-delay: 0.16s; }
+.guess-line-3 { animation-delay: 0.24s; }
+.guess-line-4 { animation-delay: 0.32s; }
+.guess-line-5 { animation-delay: 0.4s; }
+
+@keyframes line-appear {
+  0% {
+    opacity: 0;
+    stroke-width: 1;
+  }
+  50% {
+    opacity: 0.9;
+    stroke-width: 4;
+  }
+  100% {
+    opacity: 0.85;
+    stroke-width: 3;
+  }
+}

@@ -27,6 +27,7 @@ export function GameRound({
 }: GameRoundProps) {
   const [showPostcard, setShowPostcard] = useState(true);
   const [showScoreboard, setShowScoreboard] = useState(false);
+  const [hoveredPlayerId, setHoveredPlayerId] = useState<number | null>(null);
 
   const currentLocation = state.locations[state.currentRound - 1];
   const currentPlayer = state.players[state.currentPlayerIndex];
@@ -93,41 +94,26 @@ export function GameRound({
 
   return (
     <div className="game-round">
-      {/* Header */}
-      <header className="round-header">
-        <div className="round-info">
-          <span className="round-number">Round {state.currentRound}/{TOTAL_ROUNDS}</span>
-          <span className="location-hint">Where is Dad?</span>
-        </div>
-
+      {/* Floating controls - top right */}
+      <div className="floating-controls">
+        <span className="round-badge-floating">Round {state.currentRound}/{TOTAL_ROUNDS}</span>
+        <button 
+          className="floating-btn"
+          onClick={() => setShowScoreboard(!showScoreboard)}
+        >
+          📊 Scores
+        </button>
         {!isRevealing && (
-          <div className="turn-indicator">
-            <span className="turn-avatar">{currentPlayer.avatar}</span>
-            <span className="turn-name" style={{ color: currentPlayer.color }}>
-              {currentPlayer.name}'s turn
-            </span>
-          </div>
-        )}
-
-        <div className="header-actions">
           <button 
-            className="scoreboard-toggle"
-            onClick={() => setShowScoreboard(!showScoreboard)}
+            className="floating-btn"
+            onClick={() => setShowPostcard(true)}
           >
-            📊 Scores
+            ✉️ Postcard
           </button>
-          {!isRevealing && (
-            <button 
-              className="view-postcard-btn"
-              onClick={() => setShowPostcard(true)}
-            >
-              📮 View Postcard
-            </button>
-          )}
-        </div>
-      </header>
+        )}
+      </div>
 
-      {/* Main map area */}
+      {/* Full-screen map area */}
       <div className="map-area">
         <GameMap
           players={state.players}
@@ -136,65 +122,91 @@ export function GameRound({
           isRevealing={isRevealing}
           actualLocation={isRevealing ? currentLocation : undefined}
           onPlacePin={handlePlacePin}
+          hoveredPlayerId={hoveredPlayerId}
+          onPlayerHover={setHoveredPlayerId}
         />
 
-        {/* Lock in button */}
+        {/* Hint to place pin with turn indicator */}
+        {!isRevealing && !currentGuess && (
+          <div className="bottom-hint-container">
+            <div className="turn-indicator">
+              <span className="turn-avatar">{currentPlayer.avatar}</span>
+              <span className="turn-name" style={{ color: currentPlayer.color }}>
+                {currentPlayer.name}'s turn
+              </span>
+            </div>
+            <div className="pin-hint-chip">
+              👆 Click on the map to place a pin
+            </div>
+          </div>
+        )}
+
+        {/* Lock in button with player styling */}
         {!isRevealing && hasUnlockedGuess && (
           <div className="lock-in-container">
-            <button className="lock-in-button" onClick={handleLockGuess}>
-              ✓ Lock In Guess
+            <button 
+              className="lock-in-button" 
+              onClick={handleLockGuess}
+              style={{ backgroundColor: currentPlayer.color }}
+            >
+              <span className="lock-in-avatar">{currentPlayer.avatar}</span>
+              <span>✓ Lock In Guess</span>
             </button>
           </div>
         )}
 
         {/* Reveal results overlay */}
         {isRevealing && (
-          <div className="reveal-panel">
-            <h3 className="reveal-title">
-              📍 {currentLocation.name}
-            </h3>
-            
-            <div className="reveal-scores">
-              {revealScores.map(({ player, scoreResult }, index) => (
-                <div 
-                  key={player.id} 
-                  className="reveal-score-row"
-                  style={{ animationDelay: `${index * 0.15}s` }}
-                >
-                  <span className="reveal-rank">#{index + 1}</span>
-                  <span className="reveal-avatar">{player.avatar}</span>
-                  <span className="reveal-name">{player.name}</span>
-                  <span className="reveal-distance">
-                    {Math.round(scoreResult.distanceMiles).toLocaleString()} mi
-                  </span>
-                  <div className="reveal-score-breakdown">
-                    <span className="reveal-base-score">
-                      +{scoreResult.baseScore}
-                    </span>
-                    {scoreResult.bonuses.total > 0 && (
-                      <div className="reveal-bonuses">
-                        {scoreResult.bonuses.within1000 > 0 && (
-                          <span className="bonus-badge bonus-1000">+{scoreResult.bonuses.within1000}</span>
-                        )}
-                        {scoreResult.bonuses.within500 > 0 && (
-                          <span className="bonus-badge bonus-500">+{scoreResult.bonuses.within500}</span>
-                        )}
-                        {scoreResult.bonuses.within100 > 0 && (
-                          <span className="bonus-badge bonus-100">+{scoreResult.bonuses.within100}</span>
-                        )}
-                      </div>
-                    )}
-                    <span className="reveal-total" style={{ color: player.color }}>
-                      = {scoreResult.score}
-                    </span>
-                  </div>
-                </div>
-              ))}
+          <div className="reveal-container">
+            {/* Location title at top */}
+            <div className="reveal-location-banner">
+              <div className="reveal-location-chip">
+                <span className="reveal-location-icon">📍</span>
+                <span className="reveal-location-name">{currentLocation.name}</span>
+              </div>
             </div>
 
-            <button className="next-round-button" onClick={handleNextRound}>
-              {state.currentRound < TOTAL_ROUNDS ? 'Next Round →' : 'See Final Results 🏆'}
-            </button>
+            {/* Score chips at bottom */}
+            <div className="reveal-bottom-bar">
+              <div className="reveal-chips">
+                {revealScores.map(({ player, scoreResult }, index) => (
+                  <div 
+                    key={player.id} 
+                    className={`reveal-chip ${hoveredPlayerId === player.id ? 'highlighted' : ''}`}
+                    style={{ 
+                      animationDelay: `${index * 0.1}s`,
+                      borderColor: player.color,
+                    }}
+                    onMouseEnter={() => setHoveredPlayerId(player.id)}
+                    onMouseLeave={() => setHoveredPlayerId(null)}
+                  >
+                    <div className="chip-main">
+                      <span className="chip-rank">#{index + 1}</span>
+                      <span className="chip-avatar">{player.avatar}</span>
+                      <span className="chip-name">{player.name}</span>
+                      <span className="chip-score" style={{ color: player.color }}>
+                        +{scoreResult.score}
+                      </span>
+                    </div>
+                    <div className="chip-details">
+                      <span className="chip-distance">
+                        {Math.round(scoreResult.distanceMiles).toLocaleString()} mi
+                      </span>
+                      <span className="chip-calc">
+                        {scoreResult.baseScore}
+                        {scoreResult.bonuses.within1000 > 0 && <span className="mini-bonus green">+{scoreResult.bonuses.within1000}</span>}
+                        {scoreResult.bonuses.within500 > 0 && <span className="mini-bonus orange">+{scoreResult.bonuses.within500}</span>}
+                        {scoreResult.bonuses.within100 > 0 && <span className="mini-bonus pink">+{scoreResult.bonuses.within100}</span>}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <button className="next-round-button" onClick={handleNextRound}>
+                {state.currentRound < TOTAL_ROUNDS ? 'Next Round →' : 'See Final Results 🏆'}
+              </button>
+            </div>
           </div>
         )}
       </div>

@@ -15,6 +15,15 @@
   to { opacity: 1; }
 }
 
+.postcard-overlay.dismissing {
+  animation: fade-out 0.4s ease-in forwards;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
 .postcard {
   background: var(--warm-cream);
   border-radius: 4px;
@@ -38,6 +47,21 @@
   to {
     opacity: 1;
     transform: rotate(0) translateY(0) scale(1);
+  }
+}
+
+.postcard.dismissing {
+  animation: postcard-leave 0.4s ease-in forwards;
+}
+
+@keyframes postcard-leave {
+  from {
+    opacity: 1;
+    transform: rotate(0) translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(5deg) translateY(50px) scale(0.9);
   }
 }
 

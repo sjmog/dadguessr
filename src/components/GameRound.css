@@ -1,89 +1,90 @@
 .game-round {
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+  position: relative;
   background: var(--midnight-blue);
 }
 
-/* Header */
-.round-header {
+/* Floating controls - top right */
+.floating-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 500;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
-  position: relative;
-  z-index: 100;
+  gap: 0.5rem;
 }
 
-.round-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.round-number {
+.round-badge-floating {
   font-family: var(--font-display);
-  font-size: 1rem;
-  color: var(--christmas-gold);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 0.85rem;
+  color: white;
+  background: rgba(0,0,0,0.5);
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+  letter-spacing: 0.05em;
 }
 
-.location-hint {
+.floating-btn {
   font-family: var(--font-body);
-  font-size: 0.9rem;
-  color: var(--snow-white);
-  opacity: 0.8;
+  font-size: 0.85rem;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.turn-indicator {
+.floating-btn:hover {
+  background: rgba(0,0,0,0.7);
+  transform: translateY(-2px);
+}
+
+/* Bottom hint container - turn indicator + pin hint */
+.bottom-hint-container {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(255,255,255,0.1);
-  padding: 0.5rem 1rem;
-  border-radius: 30px;
+  animation: fade-in-up 0.3s ease-out;
+}
+
+/* Turn indicator */
+.turn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0,0,0,0.6);
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
   backdrop-filter: blur(5px);
 }
 
 .turn-avatar {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
 }
 
 .turn-name {
   font-family: var(--font-display);
-  font-size: 1.1rem;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.scoreboard-toggle,
-.view-postcard-btn {
-  font-family: var(--font-body);
   font-size: 0.9rem;
-  padding: 0.5rem 1rem;
-  background: rgba(255,255,255,0.15);
   color: white;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.2s;
-  backdrop-filter: blur(5px);
 }
 
-.scoreboard-toggle:hover,
-.view-postcard-btn:hover {
-  background: rgba(255,255,255,0.25);
-}
-
-/* Map area */
+/* Map area - full screen */
 .map-area {
-  flex: 1;
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
 }
 
@@ -108,6 +109,13 @@
   box-shadow: 0 6px 20px rgba(0,0,0,0.4);
   transition: all 0.2s;
   animation: pulse-glow 2s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lock-in-avatar {
+  font-size: 1.4rem;
 }
 
 @keyframes pulse-glow {
@@ -120,170 +128,241 @@
   background: #1a7a42;
 }
 
-/* Reveal panel */
-.reveal-panel {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: var(--warm-cream);
-  border-radius: 15px;
-  padding: 1.5rem;
-  width: 340px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-  z-index: 500;
-  animation: slide-in 0.4s ease-out;
+/* Pin placement hint chip */
+.pin-hint-chip {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: white;
+  background: rgba(0,0,0,0.6);
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  backdrop-filter: blur(5px);
 }
 
-@keyframes slide-in {
+@keyframes fade-in-up {
   from {
     opacity: 0;
-    transform: translateX(50px);
+    transform: translateX(-50%) translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(-50%) translateY(0);
   }
 }
 
-.reveal-title {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  color: var(--christmas-red);
-  margin: 0 0 1rem;
-  text-align: center;
-}
-
-.reveal-scores {
+/* Reveal container - full screen overlay */
+.reveal-container {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 500;
 }
 
-.reveal-score-row {
-  display: grid;
-  grid-template-columns: 28px 28px 1fr;
+/* Location banner at top */
+.reveal-location-banner {
+  display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem;
-  background: white;
-  border-radius: 8px;
-  animation: pop-in 0.3s ease-out backwards;
+  justify-content: center;
+  padding: 1rem;
+  animation: fade-down 0.4s ease-out;
+  pointer-events: auto;
 }
 
-@keyframes pop-in {
+@keyframes fade-down {
   from {
     opacity: 0;
-    transform: scale(0.8);
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
 }
 
-.reveal-rank {
+.reveal-location-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0,0,0,0.6);
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  backdrop-filter: blur(5px);
+}
+
+.reveal-location-icon {
+  font-size: 1.25rem;
+}
+
+.reveal-location-name {
   font-family: var(--font-display);
-  font-size: 0.85rem;
-  color: var(--christmas-gold);
-}
-
-.reveal-avatar {
   font-size: 1.1rem;
+  color: white;
 }
 
-.reveal-name {
+/* Bottom bar with chips */
+.reveal-bottom-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  animation: fade-up 0.4s ease-out;
+  pointer-events: auto;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Chips container */
+.reveal-chips {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+/* Individual chip */
+.reveal-chip {
+  background: var(--warm-cream);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  min-width: 140px;
+  border-left: 4px solid;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  animation: chip-pop 0.3s ease-out backwards;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+}
+
+.reveal-chip:hover,
+.reveal-chip.highlighted {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  background: #fff;
+}
+
+@keyframes chip-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.chip-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chip-rank {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--christmas-gold);
+  font-weight: bold;
+}
+
+.chip-avatar {
+  font-size: 1.25rem;
+}
+
+.chip-name {
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--text-dark);
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 80px;
 }
 
-.reveal-distance {
-  grid-column: 3;
+.chip-score {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.chip-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed rgba(0,0,0,0.1);
+}
+
+.chip-distance {
   font-family: var(--font-body);
-  font-size: 0.7rem;
-  color: #999;
-  margin-top: 0.15rem;
+  font-size: 0.65rem;
+  color: #888;
 }
 
-.reveal-score-breakdown {
-  grid-column: 1 / -1;
+.chip-calc {
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  color: #666;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin-top: 0.25rem;
-  padding-top: 0.4rem;
-  border-top: 1px dashed #e0e0e0;
+  gap: 2px;
 }
 
-.reveal-base-score {
-  font-family: var(--font-display);
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.reveal-bonuses {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.bonus-badge {
-  font-family: var(--font-display);
-  font-size: 0.65rem;
-  padding: 0.15rem 0.35rem;
-  border-radius: 4px;
+.mini-bonus {
+  font-size: 0.55rem;
   font-weight: bold;
+  padding: 1px 3px;
+  border-radius: 3px;
 }
 
-.bonus-1000 {
+.mini-bonus.green {
   background: #e8f5e9;
   color: #2e7d32;
-  border: 1px solid #a5d6a7;
 }
 
-.bonus-500 {
+.mini-bonus.orange {
   background: #fff3e0;
   color: #ef6c00;
-  border: 1px solid #ffcc80;
 }
 
-.bonus-100 {
+.mini-bonus.pink {
   background: #fce4ec;
   color: #c2185b;
-  border: 1px solid #f48fb1;
 }
 
-.reveal-total {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin-left: auto;
-}
-
-.reveal-points {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: bold;
-}
-
+/* Next round button */
 .next-round-button {
-  width: 100%;
   font-family: var(--font-display);
   font-size: 1.1rem;
-  padding: 0.8rem;
+  padding: 0.8rem 2.5rem;
   background: var(--christmas-green);
   color: white;
   border: none;
   border-radius: 30px;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 .next-round-button:hover {
   background: #1a7a42;
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
+
+
 

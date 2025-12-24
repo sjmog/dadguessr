@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { Player, RoundGuess, Location } from '../types';
@@ -13,14 +13,20 @@ interface GameMapProps {
   isRevealing: boolean;
   actualLocation?: Location;
   onPlacePin: (lat: number, lon: number) => void;
+  hoveredPlayerId?: number | null;
+  onPlayerHover?: (playerId: number | null) => void;
 }
 
 // Create custom marker icons for players
-function createPlayerIcon(avatar: string, color: string, isCurrentPlayer: boolean): L.DivIcon {
+function createPlayerIcon(avatar: string, color: string, isCurrentPlayer: boolean, isHighlighted: boolean): L.DivIcon {
+  const classes = ['marker-pin'];
+  if (isCurrentPlayer) classes.push('current');
+  if (isHighlighted) classes.push('highlighted');
+  
   return L.divIcon({
     className: 'player-marker',
     html: `
-      <div class="marker-pin ${isCurrentPlayer ? 'current' : ''}" style="--player-color: ${color}">
+      <div class="${classes.join(' ')}" style="--player-color: ${color}">
         <span class="marker-avatar">${avatar}</span>
       </div>
     `,
@@ -29,15 +35,13 @@ function createPlayerIcon(avatar: string, color: string, isCurrentPlayer: boolea
   });
 }
 
-// Actual location marker
-function createActualLocationIcon(): L.DivIcon {
-  return L.divIcon({
-    className: 'actual-marker',
-    html: `<div class="actual-pin">📍</div>`,
-    iconSize: [40, 50],
-    iconAnchor: [20, 50],
-  });
-}
+// Actual location marker - created once and reused
+const ACTUAL_LOCATION_ICON = L.divIcon({
+  className: 'actual-marker',
+  html: `<div class="actual-pin">📍</div>`,
+  iconSize: [40, 50],
+  iconAnchor: [20, 50],
+});
 
 // Component to handle map clicks
 function MapClickHandler({ onPlacePin, disabled }: { onPlacePin: (lat: number, lon: number) => void; disabled: boolean }) {
@@ -68,11 +72,13 @@ function MapResetter({ shouldReset }: { shouldReset: boolean }) {
 function MapBoundsFitter({ 
   isRevealing, 
   guessPositions, 
-  actualPosition 
+  actualPosition,
+  onAnimationComplete,
 }: { 
   isRevealing: boolean; 
   guessPositions: [number, number][]; 
   actualPosition?: [number, number];
+  onAnimationComplete?: () => void;
 }) {
   const map = useMap();
   
@@ -88,20 +94,71 @@ function MapBoundsFitter({
       const bounds = L.latLngBounds(allPoints.map(([lat, lon]) => [lat, lon]));
       
       // Small delay to let reveal animation start, then smoothly fit bounds
-      const timer = setTimeout(() => {
+      // Extra bottom padding for the score chips bar
+      const startTimer = setTimeout(() => {
         map.fitBounds(bounds, {
-          padding: [80, 80],
+          paddingTopLeft: [50, 100],
+          paddingBottomRight: [50, 200],
           maxZoom: 8,
           animate: true,
           duration: 1.5,
         });
       }, 300);
       
-      return () => clearTimeout(timer);
+      // Call onAnimationComplete shortly after animation starts settling
+      const completeTimer = setTimeout(() => {
+        onAnimationComplete?.();
+      }, 1200); // Show lines while map is still settling
+      
+      return () => {
+        clearTimeout(startTimer);
+        clearTimeout(completeTimer);
+      };
     }
-  }, [isRevealing, guessPositions, actualPosition, map]);
+  }, [isRevealing, guessPositions, actualPosition, map, onAnimationComplete]);
   
   return null;
+}
+
+// Individual player marker component to properly memoize icons
+function PlayerMarker({
+  guess,
+  players,
+  currentPlayerId,
+  hoveredPlayerId,
+  isRevealing,
+  onPlayerHover,
+}: {
+  guess: RoundGuess;
+  players: Player[];
+  currentPlayerId: number;
+  hoveredPlayerId?: number | null;
+  isRevealing: boolean;
+  onPlayerHover?: (playerId: number | null) => void;
+}) {
+  const player = players.find((p) => p.id === guess.playerId);
+  
+  const isCurrentPlayer = player?.id === currentPlayerId;
+  const isHighlighted = hoveredPlayerId === player?.id;
+  
+  // Memoize icon to prevent unnecessary recreations
+  const icon = useMemo(() => {
+    if (!player) return null;
+    return createPlayerIcon(player.avatar, player.color, isCurrentPlayer && !guess.locked, isHighlighted);
+  }, [player, isCurrentPlayer, guess.locked, isHighlighted]);
+  
+  if (!player || !icon) return null;
+  
+  return (
+    <Marker
+      position={[guess.lat, guess.lon]}
+      icon={icon}
+      eventHandlers={isRevealing && onPlayerHover ? {
+        mouseover: () => onPlayerHover(player.id),
+        mouseout: () => onPlayerHover(null),
+      } : undefined}
+    />
+  );
 }
 
 export function GameMap({
@@ -111,7 +168,18 @@ export function GameMap({
   isRevealing,
   actualLocation,
   onPlacePin,
+  hoveredPlayerId,
+  onPlayerHover,
 }: GameMapProps) {
+  const [showLines, setShowLines] = useState(false);
+
+  // Reset showLines when not revealing
+  useEffect(() => {
+    if (!isRevealing) {
+      setTimeout(() => setShowLines(false), 0);
+    }
+  }, [isRevealing]);
+
   // Prepare positions for bounds fitting
   const guessPositions: [number, number][] = roundGuesses.map(g => [g.lat, g.lon]);
   const actualPosition: [number, number] | undefined = actualLocation 
@@ -137,35 +205,32 @@ export function GameMap({
           isRevealing={isRevealing} 
           guessPositions={guessPositions}
           actualPosition={actualPosition}
+          onAnimationComplete={() => setShowLines(true)}
         />
 
         {/* Render all player guesses */}
-        {roundGuesses.map((guess) => {
-          const player = players.find((p) => p.id === guess.playerId);
-          if (!player) return null;
-          
-          const isCurrentPlayer = player.id === currentPlayerId;
-          const icon = createPlayerIcon(player.avatar, player.color, isCurrentPlayer && !guess.locked);
-          
-          return (
-            <Marker
-              key={player.id}
-              position={[guess.lat, guess.lon]}
-              icon={icon}
-            />
-          );
-        })}
+        {roundGuesses.map((guess) => (
+          <PlayerMarker
+            key={guess.playerId}
+            guess={guess}
+            players={players}
+            currentPlayerId={currentPlayerId}
+            hoveredPlayerId={hoveredPlayerId}
+            isRevealing={isRevealing}
+            onPlayerHover={onPlayerHover}
+          />
+        ))}
 
         {/* Reveal phase: actual location and lines */}
         {isRevealing && actualLocation && (
           <>
             <Marker
               position={[actualLocation.lat, actualLocation.lon]}
-              icon={createActualLocationIcon()}
+              icon={ACTUAL_LOCATION_ICON}
             />
             
-            {/* Lines from guesses to actual location */}
-            {roundGuesses.map((guess) => {
+            {/* Lines from guesses to actual location - shown after map animation completes */}
+            {showLines && roundGuesses.map((guess, index) => {
               const player = players.find((p) => p.id === guess.playerId);
               if (!player) return null;
               
@@ -179,8 +244,7 @@ export function GameMap({
                   pathOptions={{
                     color: player.color,
                     weight: 3,
-                    dashArray: '10, 10',
-                    opacity: 0.8,
+                    className: `guess-line guess-line-${index}`,
                   }}
                 />
               );

@@ -12,10 +12,17 @@ interface PostcardModalProps {
 export function PostcardModal({ location, roundNumber, totalRounds, onDismiss }: PostcardModalProps) {
   const imageUrl = `/images/${location.image}`;
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
+
+  const handleDismiss = () => {
+    setIsDismissing(true);
+    // Wait for animation to complete before actually dismissing
+    setTimeout(onDismiss, 400);
+  };
   
   return (
-    <div className="postcard-overlay" onClick={onDismiss}>
-      <div className="postcard" onClick={(e) => e.stopPropagation()}>
+    <div className={`postcard-overlay ${isDismissing ? 'dismissing' : ''}`} onClick={handleDismiss}>
+      <div className={`postcard ${isDismissing ? 'dismissing' : ''}`} onClick={(e) => e.stopPropagation()}>
         {/* Left side: Polaroid photo */}
         <div className="postcard-photo-side">
           <div className="postcard-image-frame">
@@ -58,7 +65,7 @@ export function PostcardModal({ location, roundNumber, totalRounds, onDismiss }:
 
           {/* Bottom button */}
           <div className="postcard-footer">
-            <button className="postcard-button" onClick={onDismiss}>
+            <button className="postcard-button" onClick={handleDismiss}>
               🗺️ Find Me on the Map!
             </button>
           </div>
