@@ -114,23 +114,27 @@
   background: var(--christmas-gold) !important;
 }
 
-/* Animated guess lines - CSS-controlled opacity for smooth transitions */
-/* Opacity controlled via class, not Leaflet pathOptions, to prevent element recreation */
+/* Animated guess lines - keyframe animation for reliable cross-environment behavior */
 .guess-line {
-  opacity: 0;
-  stroke-opacity: 0;
-  transition: opacity 0.5s ease-out, stroke-opacity 0.5s ease-out;
+  /* 'both' applies 0% keyframe immediately AND holds 100% after completion */
+  animation: line-fade-in 0.8s ease-out both;
 }
 
-.guess-line.visible {
-  opacity: 0.85;
-  stroke-opacity: 0.85;
-}
+/* Staggered delays - more pronounced for visual effect */
+.guess-line-0 { animation-delay: 0s; }
+.guess-line-1 { animation-delay: 0.15s; }
+.guess-line-2 { animation-delay: 0.3s; }
+.guess-line-3 { animation-delay: 0.45s; }
+.guess-line-4 { animation-delay: 0.6s; }
+.guess-line-5 { animation-delay: 0.75s; }
 
-/* Staggered delays for each line */
-.guess-line-0 { transition-delay: 0s; }
-.guess-line-1 { transition-delay: 0.08s; }
-.guess-line-2 { transition-delay: 0.16s; }
-.guess-line-3 { transition-delay: 0.24s; }
-.guess-line-4 { transition-delay: 0.32s; }
-.guess-line-5 { transition-delay: 0.4s; }
+@keyframes line-fade-in {
+  0% {
+    opacity: 0;
+    stroke-opacity: 0;
+  }
+  100% {
+    opacity: 0.85;
+    stroke-opacity: 0.85;
+  }
+}

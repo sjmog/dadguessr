@@ -171,27 +171,17 @@ export function GameMap({
   hoveredPlayerId,
   onPlayerHover,
 }: GameMapProps) {
+  // Simple state: just track when to show lines (after fitBounds starts settling)
   const [showLines, setShowLines] = useState(false);
-  const [linesVisible, setLinesVisible] = useState(false);
 
-  // Reset line states when not revealing
+  // Reset when leaving reveal phase
   useEffect(() => {
     if (!isRevealing) {
-      setShowLines(false);
-      setLinesVisible(false);
+      // Use timeout to avoid synchronous setState in effect
+      const timer = setTimeout(() => setShowLines(false), 0);
+      return () => clearTimeout(timer);
     }
   }, [isRevealing]);
-
-  // Two-phase line reveal: first render (opacity 0), then make visible (opacity 1)
-  useEffect(() => {
-    if (showLines && !linesVisible) {
-      // Use requestAnimationFrame to ensure DOM has rendered before transitioning
-      const raf = requestAnimationFrame(() => {
-        setTimeout(() => setLinesVisible(true), 50);
-      });
-      return () => cancelAnimationFrame(raf);
-    }
-  }, [showLines, linesVisible]);
 
   // Prepare positions for bounds fitting
   const guessPositions: [number, number][] = roundGuesses.map(g => [g.lat, g.lon]);
@@ -247,8 +237,6 @@ export function GameMap({
               const player = players.find((p) => p.id === guess.playerId);
               if (!player) return null;
               
-              // Keep pathOptions stable to prevent element recreation
-              // Opacity is controlled purely via CSS class for smooth transitions
               return (
                 <Polyline
                   key={`line-${player.id}`}
@@ -260,7 +248,7 @@ export function GameMap({
                     color: player.color,
                     weight: 3,
                     dashArray: '12, 8',
-                    className: `guess-line guess-line-${index}${linesVisible ? ' visible' : ''}`,
+                    className: `guess-line guess-line-${index}`,
                   }}
                 />
               );
