@@ -86,11 +86,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const nextPlayerIndex = state.currentPlayerIndex + 1;
       const allPlayersGuessed = nextPlayerIndex >= state.players.length;
 
+      // Don't set phase to 'reveal' here - let START_REVEAL do it after calculating scores
       return {
         ...state,
         roundGuesses,
         currentPlayerIndex: allPlayersGuessed ? 0 : nextPlayerIndex,
-        phase: allPlayersGuessed ? 'reveal' : 'playing',
       };
     }
 

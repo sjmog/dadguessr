@@ -5,7 +5,7 @@ import { GameMap } from './GameMap';
 import { PostcardModal } from './PostcardModal';
 import { Scoreboard } from './Scoreboard';
 import { TOTAL_ROUNDS } from '../utils/constants';
-import { calculateScore } from '../utils/scoring';
+import { calculateScore, type ScoreResult } from '../utils/scoring';
 import './GameRound.css';
 
 interface GameRoundProps {
@@ -62,17 +62,17 @@ export function GameRound({
   }, [state.currentRound, state.phase]);
 
   // Calculate scores for reveal
-  const revealScores = isRevealing
+  const revealScores: Array<{ player: typeof state.players[0]; scoreResult: ScoreResult }> = isRevealing
     ? state.roundGuesses.map((guess) => {
         const player = state.players.find((p) => p.id === guess.playerId)!;
-        const { score, distanceMiles } = calculateScore(
+        const scoreResult = calculateScore(
           guess.lat,
           guess.lon,
           currentLocation.lat,
           currentLocation.lon
         );
-        return { player, score, distanceMiles };
-      }).sort((a, b) => b.score - a.score)
+        return { player, scoreResult };
+      }).sort((a, b) => b.scoreResult.score - a.scoreResult.score)
     : [];
 
   const handlePlacePin = (lat: number, lon: number) => {
@@ -155,7 +155,7 @@ export function GameRound({
             </h3>
             
             <div className="reveal-scores">
-              {revealScores.map(({ player, score, distanceMiles }, index) => (
+              {revealScores.map(({ player, scoreResult }, index) => (
                 <div 
                   key={player.id} 
                   className="reveal-score-row"
@@ -165,11 +165,29 @@ export function GameRound({
                   <span className="reveal-avatar">{player.avatar}</span>
                   <span className="reveal-name">{player.name}</span>
                   <span className="reveal-distance">
-                    {Math.round(distanceMiles).toLocaleString()} mi
+                    {Math.round(scoreResult.distanceMiles).toLocaleString()} mi
                   </span>
-                  <span className="reveal-points" style={{ color: player.color }}>
-                    +{score}
-                  </span>
+                  <div className="reveal-score-breakdown">
+                    <span className="reveal-base-score">
+                      +{scoreResult.baseScore}
+                    </span>
+                    {scoreResult.bonuses.total > 0 && (
+                      <div className="reveal-bonuses">
+                        {scoreResult.bonuses.within1000 > 0 && (
+                          <span className="bonus-badge bonus-1000">+{scoreResult.bonuses.within1000}</span>
+                        )}
+                        {scoreResult.bonuses.within500 > 0 && (
+                          <span className="bonus-badge bonus-500">+{scoreResult.bonuses.within500}</span>
+                        )}
+                        {scoreResult.bonuses.within100 > 0 && (
+                          <span className="bonus-badge bonus-100">+{scoreResult.bonuses.within100}</span>
+                        )}
+                      </div>
+                    )}
+                    <span className="reveal-total" style={{ color: player.color }}>
+                      = {scoreResult.score}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

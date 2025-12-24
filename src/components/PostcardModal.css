@@ -1,11 +1,12 @@
 .postcard-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 1rem;
   animation: fade-in 0.3s ease-out;
 }
 
@@ -16,54 +17,61 @@
 
 .postcard {
   background: var(--warm-cream);
-  border-radius: 8px;
-  padding: 1.5rem;
-  max-width: 550px;
-  width: 90%;
+  border-radius: 4px;
+  display: flex;
+  max-width: 750px;
+  width: 100%;
+  aspect-ratio: 3 / 2;
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 8px rgba(139, 69, 19, 0.1);
-  transform: rotate(2deg);
+    0 25px 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.1);
   position: relative;
   animation: postcard-arrive 0.5s ease-out;
+  overflow: hidden;
 }
 
 @keyframes postcard-arrive {
   from {
     opacity: 0;
-    transform: rotate(-10deg) translateY(-50px) scale(0.8);
+    transform: rotate(-5deg) translateY(-30px) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: rotate(2deg) translateY(0) scale(1);
+    transform: rotate(0) translateY(0) scale(1);
   }
 }
 
-/* Torn edge effect */
-.postcard::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  background: var(--warm-cream);
-  border-radius: 8px;
-  z-index: -1;
-  filter: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='torn'%3E%3CfeTurbulence baseFrequency='0.04' numOctaves='5'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='3'/%3E%3C/filter%3E%3C/svg%3E#torn");
+/* Left side with the photo - takes up more space */
+.postcard-photo-side {
+  flex: 0 0 55%;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: 
+    linear-gradient(135deg, rgba(0,0,0,0.03) 0%, transparent 50%);
 }
 
+/* Polaroid-style instant photo frame */
 .postcard-image-frame {
-  background: white;
-  padding: 0.75rem;
-  border-radius: 4px;
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: #fefefe;
+  padding: 0.5rem 0.5rem 2rem 0.5rem;
+  border-radius: 2px;
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: rotate(-3deg);
+  height: 95%;
+  display: flex;
+  flex-direction: column;
 }
 
 .postcard-image-container {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: 2px;
+  flex: 1;
+  aspect-ratio: 2 / 3;
   overflow: hidden;
-  background: #f5f5f5;
+  background: #e8e8e8;
 }
 
 .postcard-loading {
@@ -72,30 +80,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e8f5e9 0%, #fff3e0 100%);
+  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
 }
 
 .loading-globe {
-  font-size: 4rem;
+  font-size: 3rem;
   animation: spin-globe 2s linear infinite;
 }
 
 @keyframes spin-globe {
-  0% { 
-    transform: rotate(0deg) scale(1);
-  }
-  25% {
-    transform: rotate(90deg) scale(1.1);
-  }
-  50% { 
-    transform: rotate(180deg) scale(1);
-  }
-  75% {
-    transform: rotate(270deg) scale(1.1);
-  }
-  100% { 
-    transform: rotate(360deg) scale(1);
-  }
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.1); }
+  50% { transform: rotate(180deg) scale(1); }
+  75% { transform: rotate(270deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1); }
 }
 
 .postcard-image {
@@ -110,85 +108,138 @@
   opacity: 1;
 }
 
+/* Right side - message area */
+.postcard-message-side {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border-left: 2px dashed rgba(0, 0, 0, 0.12);
+  background: 
+    repeating-linear-gradient(
+      transparent,
+      transparent 1.75rem,
+      rgba(176, 196, 222, 0.15) 1.75rem,
+      rgba(176, 196, 222, 0.15) 1.8rem
+    );
+}
+
+/* Top header with round and stamp */
+.postcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.round-badge {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--christmas-green);
+  padding: 0.25rem 0.5rem;
+  border: 2px dashed var(--christmas-green);
+  border-radius: 3px;
+  transform: rotate(-2deg);
+}
+
+/* Postage stamp effect */
+.postage-stamp {
+  width: 70px;
+  height: 85px;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transform: rotate(3deg);
+  /* Perforated edge effect */
+  -webkit-mask: 
+    radial-gradient(circle at 4px 0, transparent 3px, black 3.5px) top / 8px 100%,
+    radial-gradient(circle at 4px 100%, transparent 3px, black 3.5px) bottom / 8px 100%,
+    radial-gradient(circle at 0 4px, transparent 3px, black 3.5px) left / 100% 8px,
+    radial-gradient(circle at 100% 4px, transparent 3px, black 3.5px) right / 100% 8px;
+  -webkit-mask-composite: source-in;
+  mask: 
+    radial-gradient(circle at 4px 0, transparent 3px, black 3.5px) top / 8px 100%,
+    radial-gradient(circle at 4px 100%, transparent 3px, black 3.5px) bottom / 8px 100%,
+    radial-gradient(circle at 0 4px, transparent 3px, black 3.5px) left / 100% 8px,
+    radial-gradient(circle at 100% 4px, transparent 3px, black 3.5px) right / 100% 8px;
+  mask-composite: intersect;
+}
+
+.stamp-inner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #c41e3a 0%, #8b0000 100%);
+  border: 2px solid #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  gap: 2px;
+}
+
+.stamp-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+}
+
+.stamp-text {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.stamp-price {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* Center content */
 .postcard-content {
-  padding: 1rem 0 0;
-  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .postcard-message {
   font-family: var(--font-display);
   font-size: 2rem;
   color: var(--christmas-red);
-  margin: 0 0 1rem;
+  margin: 0;
   transform: rotate(-2deg);
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
 }
 
-.postcard-stamps {
+/* Bottom footer with button */
+.postcard-footer {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.stamp {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  padding: 0.5rem 0.75rem;
-  border: 2px dashed;
-  border-radius: 4px;
-  transform: rotate(-3deg);
-}
-
-.stamp-round {
-  color: var(--christmas-green);
-  border-color: var(--christmas-green);
-  background: rgba(22, 91, 51, 0.1);
-}
-
-.stamp-postage {
-  color: var(--christmas-red);
-  border-color: var(--christmas-red);
-  background: rgba(196, 30, 58, 0.1);
-  transform: rotate(3deg);
+  justify-content: center;
+  padding-top: 0.5rem;
 }
 
 .postcard-button {
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  padding: 0.8rem 2rem;
+  font-size: 1.25rem;
+  padding: 1rem 2.5rem;
   background: var(--christmas-green);
   color: white;
   border: none;
-  border-radius: 30px;
+  border-radius: 50px;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 0 #0d3d22;
+  box-shadow: 0 4px 0 #0d3d22, 0 6px 20px rgba(0,0,0,0.2);
 }
 
 .postcard-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 #0d3d22;
+  transform: translateY(-3px);
+  box-shadow: 0 7px 0 #0d3d22, 0 10px 30px rgba(0,0,0,0.25);
 }
 
 .postcard-button:active {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 #0d3d22;
-}
-
-/* Decorations */
-.postcard-decoration {
-  position: absolute;
-  font-size: 2rem;
-  pointer-events: none;
-}
-
-.postcard-decoration-1 {
-  top: -15px;
-  right: 20px;
-  transform: rotate(15deg);
-}
-
-.postcard-decoration-2 {
-  bottom: -10px;
-  left: 15px;
-  transform: rotate(-10deg);
+  box-shadow: 0 2px 0 #0d3d22, 0 4px 10px rgba(0,0,0,0.2);
 }
