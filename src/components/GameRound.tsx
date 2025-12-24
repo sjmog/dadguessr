@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameState } from '../types';
+import type { SoundType } from '../hooks/useSound';
 import { GameMap } from './GameMap';
 import { PostcardModal } from './PostcardModal';
 import { Scoreboard } from './Scoreboard';
@@ -13,6 +14,7 @@ interface GameRoundProps {
   onLockGuess: () => void;
   onStartReveal: () => void;
   onNextRound: () => void;
+  playSound: (sound: SoundType) => void;
 }
 
 export function GameRound({
@@ -21,6 +23,7 @@ export function GameRound({
   onLockGuess,
   onStartReveal,
   onNextRound,
+  playSound,
 }: GameRoundProps) {
   const [showPostcard, setShowPostcard] = useState(true);
   const [showScoreboard, setShowScoreboard] = useState(false);
@@ -41,11 +44,12 @@ export function GameRound({
     if (allLocked && state.phase === 'playing') {
       // Small delay before reveal
       const timer = setTimeout(() => {
+        playSound('reveal');
         onStartReveal();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [state.roundGuesses, state.players.length, state.phase, onStartReveal]);
+  }, [state.roundGuesses, state.players.length, state.phase, onStartReveal, playSound]);
 
   // Show postcard at the start of each round (track round changes)
   const prevRoundRef = React.useRef(state.currentRound);
@@ -71,7 +75,18 @@ export function GameRound({
       }).sort((a, b) => b.score - a.score)
     : [];
 
+  const handlePlacePin = (lat: number, lon: number) => {
+    playSound('pin-place');
+    onPlacePin(lat, lon);
+  };
+
+  const handleLockGuess = () => {
+    playSound('lock-guess');
+    onLockGuess();
+  };
+
   const handleNextRound = () => {
+    playSound('round-complete');
     setShowPostcard(true);
     onNextRound();
   };
@@ -120,13 +135,13 @@ export function GameRound({
           currentPlayerId={currentPlayer.id}
           isRevealing={isRevealing}
           actualLocation={isRevealing ? currentLocation : undefined}
-          onPlacePin={onPlacePin}
+          onPlacePin={handlePlacePin}
         />
 
         {/* Lock in button */}
         {!isRevealing && hasUnlockedGuess && (
           <div className="lock-in-container">
-            <button className="lock-in-button" onClick={onLockGuess}>
+            <button className="lock-in-button" onClick={handleLockGuess}>
               ✓ Lock In Guess
             </button>
           </div>

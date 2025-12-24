@@ -9,15 +9,14 @@ export type SoundType =
   | 'round-complete'
   | 'victory';
 
-// For now, we'll use simple placeholder sounds
-// These can be replaced with actual audio files later
+// Sound file URLs (in public/sounds/)
 const SOUND_URLS: Record<SoundType, string | null> = {
-  'pin-place': null,
-  'lock-guess': null,
-  'reveal': null,
-  'score-tick': null,
-  'round-complete': null,
-  'victory': null,
+  'pin-place': '/sounds/pin-place.wav',
+  'lock-guess': '/sounds/lock-guess.wav',
+  'reveal': '/sounds/reveal.wav',
+  'score-tick': null, // No file for this one
+  'round-complete': '/sounds/round-complete.wav',
+  'victory': '/sounds/victory.wav',
 };
 
 export function useSound() {

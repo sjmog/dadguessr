@@ -24,7 +24,7 @@ export function PostcardModal({ location, roundNumber, totalRounds, onDismiss }:
             }}
           >
             <div className="postcard-placeholder">
-              <span className="placeholder-icon">🍺</span>
+              <span className="placeholder-icon">🎉</span>
               <span className="placeholder-text">Dad is somewhere...</span>
             </div>
           </div>

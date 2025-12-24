@@ -1,10 +1,12 @@
 import { useEffect, useState, useMemo } from 'react';
 import type { Player } from '../types';
+import type { SoundType } from '../hooks/useSound';
 import './FinalLeaderboard.css';
 
 interface FinalLeaderboardProps {
   players: Player[];
   onPlayAgain: () => void;
+  playSound: (sound: SoundType) => void;
 }
 
 // Pre-generate confetti styles
@@ -18,9 +20,14 @@ function generateConfettiStyles(count: number) {
   }));
 }
 
-export function FinalLeaderboard({ players, onPlayAgain }: FinalLeaderboardProps) {
+export function FinalLeaderboard({ players, onPlayAgain, playSound }: FinalLeaderboardProps) {
   const [showConfetti, setShowConfetti] = useState(true);
   const confettiStyles = useMemo(() => generateConfettiStyles(50), []);
+
+  // Play victory sound on mount
+  useEffect(() => {
+    playSound('victory');
+  }, [playSound]);
 
   // Sort players by score and handle ties
   const sortedPlayers = [...players].sort((a, b) => b.totalScore - a.totalScore);

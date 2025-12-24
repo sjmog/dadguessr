@@ -1,4 +1,5 @@
 import { useGameState } from './hooks/useGameState';
+import { useSound } from './hooks/useSound';
 import { TitleScreen } from './components/TitleScreen';
 import { PlayerSetup } from './components/PlayerSetup';
 import { GameRound } from './components/GameRound';
@@ -7,6 +8,7 @@ import './App.css';
 
 function App() {
   const { state, actions } = useGameState();
+  const { play: playSound } = useSound();
 
   // Route to the appropriate screen based on game phase
   switch (state.phase) {
@@ -32,6 +34,7 @@ function App() {
           onLockGuess={actions.lockGuess}
           onStartReveal={actions.startReveal}
           onNextRound={actions.nextRound}
+          playSound={playSound}
         />
       );
 
@@ -40,6 +43,7 @@ function App() {
         <FinalLeaderboard
           players={state.players}
           onPlayAgain={actions.playAgain}
+          playSound={playSound}
         />
       );
 

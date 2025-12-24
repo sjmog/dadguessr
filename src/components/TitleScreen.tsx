@@ -28,7 +28,7 @@ export function TitleScreen({ onStart }: TitleScreenProps) {
           <span className="title-dad">Dad</span>
           <span className="title-guessr">Guessr</span>
         </h1>
-        <p className="title-tagline">Where in the world is Dad having a beer?</p>
+        <p className="title-tagline">Where in the world is Dad?</p>
         
         <div className="title-stamps">
           <span className="stamp">🎄</span>
