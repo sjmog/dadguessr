@@ -114,28 +114,16 @@
   background: var(--christmas-gold) !important;
 }
 
-/* Animated guess lines - fade-in animation */
-/* Note: dashArray is set via Leaflet pathOptions for consistency */
+/* Animated guess lines - transition-based fade-in */
+/* Note: dashArray and opacity are set via Leaflet pathOptions for consistency */
 .guess-line {
-  animation: line-appear 0.6s ease-out forwards;
-  opacity: 0;
+  transition: opacity 0.5s ease-out, stroke-opacity 0.5s ease-out;
 }
 
-.guess-line-0 { animation-delay: 0s; }
-.guess-line-1 { animation-delay: 0.08s; }
-.guess-line-2 { animation-delay: 0.16s; }
-.guess-line-3 { animation-delay: 0.24s; }
-.guess-line-4 { animation-delay: 0.32s; }
-.guess-line-5 { animation-delay: 0.4s; }
-
-@keyframes line-appear {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0.85;
-  }
-}
+/* Staggered delays for each line */
+.guess-line-0 { transition-delay: 0s; }
+.guess-line-1 { transition-delay: 0.08s; }
+.guess-line-2 { transition-delay: 0.16s; }
+.guess-line-3 { transition-delay: 0.24s; }
+.guess-line-4 { transition-delay: 0.32s; }
+.guess-line-5 { transition-delay: 0.4s; }

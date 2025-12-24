@@ -172,13 +172,26 @@ export function GameMap({
   onPlayerHover,
 }: GameMapProps) {
   const [showLines, setShowLines] = useState(false);
+  const [linesVisible, setLinesVisible] = useState(false);
 
-  // Reset showLines when not revealing
+  // Reset line states when not revealing
   useEffect(() => {
     if (!isRevealing) {
-      setTimeout(() => setShowLines(false), 0);
+      setShowLines(false);
+      setLinesVisible(false);
     }
   }, [isRevealing]);
+
+  // Two-phase line reveal: first render (opacity 0), then make visible (opacity 1)
+  useEffect(() => {
+    if (showLines && !linesVisible) {
+      // Use requestAnimationFrame to ensure DOM has rendered before transitioning
+      const raf = requestAnimationFrame(() => {
+        setTimeout(() => setLinesVisible(true), 50);
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [showLines, linesVisible]);
 
   // Prepare positions for bounds fitting
   const guessPositions: [number, number][] = roundGuesses.map(g => [g.lat, g.lon]);
@@ -245,7 +258,8 @@ export function GameMap({
                     color: player.color,
                     weight: 3,
                     dashArray: '12, 8',
-                    className: `guess-line guess-line-${index}`,
+                    opacity: linesVisible ? 0.85 : 0,
+                    className: `guess-line guess-line-${index}${linesVisible ? ' visible' : ''}`,
                   }}
                 />
               );
