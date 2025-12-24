@@ -129,9 +129,9 @@ export function GameRound({
         {/* Hint to place pin with turn indicator */}
         {!isRevealing && !currentGuess && (
           <div className="bottom-hint-container">
-            <div className="turn-indicator">
+            <div className="turn-indicator" style={{ backgroundColor: currentPlayer.color }}>
               <span className="turn-avatar">{currentPlayer.avatar}</span>
-              <span className="turn-name" style={{ color: currentPlayer.color }}>
+              <span className="turn-name">
                 {currentPlayer.name}'s turn
               </span>
             </div>
