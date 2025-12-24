@@ -1,10 +1,60 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, useMapEvents, useMap } from 'react-leaflet';
+import type { Polyline as LeafletPolyline } from 'leaflet';
 import L from 'leaflet';
 import type { Player, RoundGuess, Location } from '../types';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '../utils/constants';
 import 'leaflet/dist/leaflet.css';
 import './GameMap.css';
+
+// Animated polyline that fades in using direct DOM manipulation
+// This bypasses CSS specificity issues with Leaflet's inline styles
+function AnimatedPolyline({ 
+  positions, 
+  color, 
+  delay 
+}: { 
+  positions: [number, number][]; 
+  color: string; 
+  delay: number;
+}) {
+  const polylineRef = useRef<LeafletPolyline>(null);
+  
+  useEffect(() => {
+    const polyline = polylineRef.current;
+    if (!polyline) return;
+    
+    const pathElement = polyline.getElement() as SVGElement | null;
+    if (!pathElement) return;
+    
+    // Step 1: Set opacity to 0 immediately (no transition yet)
+    pathElement.style.transition = 'none';
+    pathElement.style.opacity = '0';
+    
+    // Step 2: Force a reflow so the browser registers the initial state
+    pathElement.getBoundingClientRect();
+    
+    // Step 3: Add transition and fade in after delay
+    const timer = setTimeout(() => {
+      pathElement.style.transition = 'opacity 0.8s ease-out';
+      pathElement.style.opacity = '0.85';
+    }, delay);
+    
+    return () => clearTimeout(timer);
+  }, [delay]);
+  
+  return (
+    <Polyline
+      ref={polylineRef}
+      positions={positions}
+      pathOptions={{
+        color,
+        weight: 3,
+        dashArray: '12, 8',
+      }}
+    />
+  );
+}
 
 interface GameMapProps {
   players: Player[];
@@ -231,18 +281,14 @@ export function GameMap({
               if (!player) return null;
               
               return (
-                <Polyline
+                <AnimatedPolyline
                   key={`line-${player.id}`}
                   positions={[
                     [guess.lat, guess.lon],
                     [actualLocation.lat, actualLocation.lon],
                   ]}
-                  pathOptions={{
-                    color: player.color,
-                    weight: 3,
-                    dashArray: '12, 8',
-                    className: `guess-line guess-line-${index}`,
-                  }}
+                  color={player.color}
+                  delay={index * 150}
                 />
               );
             })}
