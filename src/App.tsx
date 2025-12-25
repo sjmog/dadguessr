@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useGameState } from './hooks/useGameState';
 import { useSound } from './hooks/useSound';
 import { TitleScreen } from './components/TitleScreen';
@@ -9,6 +10,20 @@ import './App.css';
 function App() {
   const { state, actions } = useGameState();
   const { play: playSound } = useSound();
+
+  useEffect(() => {
+    const isGameInProgress = state.phase === 'playing' || state.phase === 'reveal';
+    
+    if (!isGameInProgress) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      return '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [state.phase]);
 
   // Route to the appropriate screen based on game phase
   switch (state.phase) {
